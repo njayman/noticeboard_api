@@ -5,7 +5,10 @@ const MaterialSchema = new Schema({
         type: String,
         required: true
     },
-    materialobject: [],
+    material: {
+        type: String,
+        required: true
+    },
     adminid: {
         type: String,
         required: true

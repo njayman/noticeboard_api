@@ -1,7 +1,15 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const Admin = require('../models/AdminModel')
-const { JWTSECRET } = process.env;
+const Material = require('../models/MaterialModel')
+
+const { JWTSECRET, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({
+    cloud_name: CLOUDINARY_CLOUD_NAME,
+    api_key: CLOUDINARY_API_KEY,
+    api_secret: CLOUDINARY_API_SECRET
+});
 
 exports.adminRegister = async (req, res) => {
     try {
@@ -54,3 +62,46 @@ exports.adminLogin = async (req, res) => {
         res.json({ success: false, message: error.message })
     }
 }
+
+exports.adminUploads = async (req, res) => {
+    try {
+        const file = req.file;
+        const values = JSON.parse(req.body.values)
+        cloudinary.uploader.upload(file.path, async (error, response) => {
+            if (error) {
+                res.json({ success: false, message: error.message })
+            } else if (response) {
+                values.material = response.url;
+                const material = new Material(values)
+                // console.log(material)
+                await material.save()
+                res.json({ success: true, message: 'Successfully uploaded material' })
+            }
+        });
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+
+}
+
+exports.addmaterial = async (req, res) => {
+    try {
+        const material = new Material(req.body)
+        await material.save()
+        res.json({ success: true, message: 'Successfully added material' })
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+
+    }
+}
+
+exports.getmaterials = async (req, res) => {
+    try {
+        const materials = await Material.find()
+        res.json({ success: true, materials: materials })
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
