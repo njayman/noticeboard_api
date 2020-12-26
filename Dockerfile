@@ -1,6 +1,6 @@
 FROM node:12
 
-WORKDIR ~/Apps/noticebee
+WORKDIR /usr/app/noticebee
 
 COPY package*.json ./
 
@@ -8,5 +8,5 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 8080
+EXPOSE 5000
 CMD [ "node", "server.js" ]

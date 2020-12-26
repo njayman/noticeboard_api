@@ -6,7 +6,7 @@ const { JWTSECRET } = process.env;
 exports.adminRegister = async (req, res) => {
     try {
         const adminObject = req.body;
-        //console.log(adminObject)
+        // console.log(adminObject)
         let saltround = 10
         let salt = await bcrypt.genSalt(saltround)
         //const randompassword = Math.random().toString().slice(-8)
@@ -14,26 +14,28 @@ exports.adminRegister = async (req, res) => {
         const hashedPassword = await bcrypt.hash(adminObject.password, salt)
         adminObject.password = hashedPassword;
         const admin = new Admin(adminObject)
-        //console.log(admin)
+        // console.log(admin)
         await admin.save()
-        res.send({ success: true, message: `Successfully registered as ${adminObject.name}` })
+        res.json({ success: true, message: `Successfully registered as ${adminObject.name}` })
     } catch (error) {
-        res.send({ success: false, message: error.message })
+        res.json({ success: false, message: error.message })
 
     }
 }
 
 exports.adminLogin = async (req, res) => {
     try {
+        console.log(req.body)
         const adminExists = await Admin.exists({ name: req.body.name })
         if (adminExists) {
-            const admin = await Admin.findOne({ name: req.body.user })
+            const admin = await Admin.findOne({ name: req.body.name })
             bcrypt.compare(req.body.password, admin.password).then(result => {
                 if (result) {
                     const adminToken = jwt.sign({
                         id: admin._id,
                         name: admin.name,
                         organization: admin.organization,
+                        type: 'admin'
                     },
                         JWTSECRET,
                         {

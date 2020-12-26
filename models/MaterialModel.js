@@ -1,12 +1,12 @@
 const { model, Schema } = require('mongoose');
 
 const MaterialSchema = new Schema({
-    materialType: {
+    materialtype: {
         type: String,
         required: true
     },
-    materialObject: [],
-    adminId: {
+    materialobject: [],
+    adminid: {
         type: String,
         required: true
     }
