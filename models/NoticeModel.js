@@ -1,6 +1,6 @@
 const { model, Schema } = require('mongoose');
 
-const MaterialSchema = new Schema({
+const NoticeSchema = new Schema({
     name: {
         type: String,
         required: true
@@ -12,11 +12,7 @@ const MaterialSchema = new Schema({
     material: {
         type: String,
         required: true
-    },
-    adminid: {
-        type: String,
-        required: true
     }
 })
 
-module.exports = model("Material", MaterialSchema);
+module.exports = model("Notice", NoticeSchema);

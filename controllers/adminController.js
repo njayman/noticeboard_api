@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const Admin = require('../models/AdminModel')
 const Material = require('../models/MaterialModel')
+const Notice = require('../models/NoticeModel')
 
 const { JWTSECRET, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
 const cloudinary = require('cloudinary').v2;
@@ -56,7 +57,7 @@ exports.adminLogin = async (req, res) => {
                 }
             })
         } else {
-            res.json({ success: false, message: `User ${admin.name} doesn't exist` })
+            res.json({ success: false, message: `User ${req.body.name} doesn't exist` })
         }
     } catch (error) {
         res.json({ success: false, message: error.message })
@@ -89,7 +90,19 @@ exports.addmaterial = async (req, res) => {
     try {
         const material = new Material(req.body)
         await material.save()
-        res.json({ success: true, message: 'Successfully added material' })
+        res.json({ success: true, message: 'Successfully added new material' })
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+
+    }
+}
+
+exports.addnotice = async (req, res) => {
+    try {
+        const notice = new Notice(req.body)
+        console.log(req.body)
+        await notice.save()
+        res.json({ success: true, message: 'Successfully added new notice' })
     } catch (error) {
         res.json({ success: false, message: error.message })
 
@@ -105,3 +118,20 @@ exports.getmaterials = async (req, res) => {
     }
 }
 
+exports.getmaterial = async (req, res) => {
+    try {
+        const material = await Material.findOne({ _id: req.params.id })
+        res.json({ success: true, material: material })
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+exports.getnotices = async (req, res) => {
+    try {
+        const notices = await Notice.find()
+        res.json({ success: true, notices: notices })
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
