@@ -13,10 +13,11 @@ mongoose.connect(`mongodb+srv://${DBUSER}:${DBPASSWORD}@njay.iy3to.mongodb.net/$
     .catch(error => console.log(error.message))
 
 //route management
+const masterRoute = require('./routes/masterRoute')
 const noticeboardRoute = require('./routes/noticeboardRoute')
 const adminRoute = require('./routes/adminRoute')
 app.use('/', noticeboardRoute)
 app.use('/admin', adminRoute)
-
+app.use('/master', masterRoute)
 //listener
 app.listen(PORT, () => console.log("Server is up!"));

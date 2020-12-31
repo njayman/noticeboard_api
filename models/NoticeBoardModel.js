@@ -1,10 +1,14 @@
 const { model, Schema } = require('mongoose');
 
 const NoticeBoardSchema = new Schema({
-    macAddress: {
+    name: {
         type: String,
-        required: true
+        required: true,
     },
+    // macAddress: {
+    //     type: String,
+    //     required: true
+    // },
     lastUpdateid: {
         type: String,
     },

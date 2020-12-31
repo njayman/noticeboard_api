@@ -14,6 +14,7 @@ exports.checkNotice = async (req, res) => {
             res.json({ success: true, updated: false })
         }
     } catch (error) {
+        console.error(error)
         res.json({ success: false, message: error.message })
     }
 }
@@ -23,6 +24,7 @@ exports.confirmUpdate = async (req, res) => {
         const noticeBoard = await NoticeBoard.findOne({ _id: req.params.id })
         const match = await bcrypt.compare(noticeBoard.lastUpdateid, req.body.hash)
         if (match) {
+            await NoticeBoard.updateOne({ _id: req.params.id }, { $set: { updateSwitch: false } })
             res.json({ success: true })
         } else {
             res.json({ success: false, message: null })

@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken')
 const Admin = require('../models/AdminModel')
 const Material = require('../models/MaterialModel')
 const Notice = require('../models/NoticeModel')
+const Organization = require('../models/OrganizationModel');
+const NoticeBoard = require('../models/NoticeBoardModel');
 
 const { JWTSECRET, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
 const cloudinary = require('cloudinary').v2;
@@ -99,9 +101,15 @@ exports.addmaterial = async (req, res) => {
 
 exports.addnotice = async (req, res) => {
     try {
-        const notice = new Notice(req.body)
+        const bodyData = req.body;
+        bodyData.organization = req.params.id
+        const notice = new Notice(bodyData)
         console.log(req.body)
         await notice.save()
+        const organization = await Organization.findOne({ _id: req.params.id })
+        organization.boards.map(async board => {
+            await NoticeBoard.updateOne({ _id: board }, { $set: { updateSwitch: true, lastUpdateid: notice._id } })
+        })
         res.json({ success: true, message: 'Successfully added new notice' })
     } catch (error) {
         res.json({ success: false, message: error.message })
@@ -129,7 +137,7 @@ exports.getmaterial = async (req, res) => {
 
 exports.getnotices = async (req, res) => {
     try {
-        const notices = await Notice.find()
+        const notices = await Notice.find().populate('material');
         res.json({ success: true, notices: notices })
     } catch (error) {
         res.json({ success: false, message: error.message })

@@ -6,7 +6,8 @@ const AdminSchema = new Schema({
         required: true
     },
     organization: {
-        type: String,
+        type: Schema.Types.ObjectId,
+        ref: "Organization",
         required: true
     },
     password: {

@@ -6,7 +6,7 @@ router.post('/register', adminRegister)
 router.post('/login', adminLogin)
 router.post('/upload', multerUploads, adminUploads)
 router.post('/addmaterial', addmaterial)
-router.post('/addnotice', addnotice)
+router.post('/addnotice/:id', addnotice)
 
 router.get('/getmaterials', getmaterials)
 router.get('/getmaterial/:id', getmaterial)

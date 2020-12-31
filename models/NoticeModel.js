@@ -1,5 +1,4 @@
 const { model, Schema } = require('mongoose');
-
 const NoticeSchema = new Schema({
     name: {
         type: String,
@@ -10,8 +9,13 @@ const NoticeSchema = new Schema({
         required: true
     },
     material: {
-        type: String,
+        type: Schema.Types.ObjectId,
+        ref: 'Material',
         required: true
+    },
+    organization: {
+        type: Schema.Types.ObjectId,
+        ref: 'Organization'
     }
 })
 
