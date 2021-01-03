@@ -16,6 +16,10 @@ const NoticeSchema = new Schema({
     organization: {
         type: Schema.Types.ObjectId,
         ref: 'Organization'
+    },
+    status: {
+        type: Boolean,
+        default: true
     }
 })
 

@@ -9,9 +9,9 @@ exports.checkNotice = async (req, res) => {
             let saltround = 10
             let salt = await bcrypt.genSalt(saltround)
             const hash = await bcrypt.hash(noticeBoard.lastUpdateid, salt)
-            res.json({ success: true, updated: true, hash: hash })
+            res.json({ success: true, updated: 1, hash: hash })
         } else {
-            res.json({ success: true, updated: false })
+            res.json({ success: true, updated: 0 })
         }
     } catch (error) {
         console.error(error)
@@ -27,7 +27,7 @@ exports.confirmUpdate = async (req, res) => {
             await NoticeBoard.updateOne({ _id: req.params.id }, { $set: { updateSwitch: false } })
             res.json({ success: true })
         } else {
-            res.json({ success: false, message: null })
+            res.json({ success: false, message: 'Something went wrong. Please contact the developer' })
         }
     } catch (error) {
         res.json({ success: false, message: error.message })

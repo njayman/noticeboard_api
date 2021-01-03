@@ -36,7 +36,7 @@ exports.adminRegister = async (req, res) => {
 
 exports.adminLogin = async (req, res) => {
     try {
-        console.log(req.body)
+        // console.log(req.body)
         const adminExists = await Admin.exists({ name: req.body.name })
         if (adminExists) {
             const admin = await Admin.findOne({ name: req.body.name })
@@ -104,7 +104,7 @@ exports.addnotice = async (req, res) => {
         const bodyData = req.body;
         bodyData.organization = req.params.id
         const notice = new Notice(bodyData)
-        console.log(req.body)
+        // console.log(req.body)
         await notice.save()
         const organization = await Organization.findOne({ _id: req.params.id })
         organization.boards.map(async board => {
@@ -137,9 +137,72 @@ exports.getmaterial = async (req, res) => {
 
 exports.getnotices = async (req, res) => {
     try {
+        const notices = await Notice.find({ status: true }).populate('material');
+        res.json({ success: true, notices: notices })
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+exports.getselectednotices = async (req, res) => {
+    try {
         const notices = await Notice.find().populate('material');
         res.json({ success: true, notices: notices })
     } catch (error) {
         res.json({ success: false, message: error.message })
     }
 }
+
+exports.changeView = async (req, res) => {
+    try {
+        console.log(req.body)
+        await NoticeBoard.updateOne({ _id: req.params.id }, { $set: { displaytype: req.body.displaytype, selectednotices: req.body.selectednotices } })
+        res.json({ success: true, message: `View changed to ${req.body.view}` })
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+exports.getnoticeboards = async (req, res) => {
+    try {
+        const noticeboards = await NoticeBoard.find({ organization: req.params.orgid }).populate('selectednotices')
+        res.json({ success: true, noticeboards: noticeboards })
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+exports.setnoticestatus = async (req, res) => {
+    try {
+        await Notice.updateOne({ _id: req.params.noticeid }, { $set: { status: !(req.body.status === 'on') } })
+        res.json({ success: true, message: "Status changed" })
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+exports.getnoticeboard = async (req, res) => {
+    try {
+        const noticeboard = await NoticeBoard.findOne({ _id: req.params.id }).populate('selectednotices')
+        res.json({ success: true, noticeboard: noticeboard })
+
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+exports.toggleheadline = async (req, res) => {
+    try {
+        const noticeboard = await NoticeBoard.findOne({ _id: req.params.id })
+        if (noticeboard?.headline) {
+            await NoticeBoard.updateOne({ _id: req.params.id }, { $set: { headline: false } })
+        } else {
+            await NoticeBoard.updateOne({ _id: req.params.id }, { $set: { headline: true } })
+        }
+        res.json({ success: true, message: "successfully toggled headline" })
+
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
