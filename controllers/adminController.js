@@ -183,7 +183,7 @@ exports.setnoticestatus = async (req, res) => {
 
 exports.getnoticeboard = async (req, res) => {
     try {
-        const noticeboard = await NoticeBoard.findOne({ _id: req.params.id }).populate('selectednotices')
+        const noticeboard = await NoticeBoard.findOne({ _id: req.params.id }).populate({ path: 'selectednotices', populate: { path: "material" } })
         res.json({ success: true, noticeboard: noticeboard })
 
     } catch (error) {
