@@ -194,7 +194,7 @@ exports.getnoticeboard = async (req, res) => {
 exports.toggleheadline = async (req, res) => {
     try {
         const noticeboard = await NoticeBoard.findOne({ _id: req.params.id })
-        if (noticeboard?.headline) {
+        if (noticeboard.headline) {
             await NoticeBoard.updateOne({ _id: req.params.id }, { $set: { headline: false } })
         } else {
             await NoticeBoard.updateOne({ _id: req.params.id }, { $set: { headline: true } })
