@@ -237,3 +237,21 @@ exports.setnoticeset = async (req, res) => {
         res.json({ success: false, message: error.message })
     }
 }
+
+exports.getnoticeset = async (req, res) => {
+    try {
+        const noticeset = await NoticeSets.findOne({ _id: req.params.id }).populate('materials')
+        res.json({ success: true, noticeset: noticeset })
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+exports.updatenoticeset = async (req, res) => {
+    try {
+        await NoticeSets.updateOne({ _id: req.params.id }, { $set: { name: req.body.name, viewtype: req.body.viewtype, interval: req.body.interval, materials: req.body.materials } })
+        res.json({ success: true, message: "Successfully updated noticeset" })
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
