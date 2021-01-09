@@ -5,9 +5,11 @@ const Material = require('../models/MaterialModel')
 const Notice = require('../models/NoticeModel')
 const Organization = require('../models/OrganizationModel');
 const NoticeBoard = require('../models/NoticeBoardModel');
+const NoticeSets = require('../models/NoticeSetsModel')
 
 const { JWTSECRET, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
 const cloudinary = require('cloudinary').v2;
+const { populate } = require('../models/AdminModel')
 cloudinary.config({
     cloud_name: CLOUDINARY_CLOUD_NAME,
     api_key: CLOUDINARY_API_KEY,
@@ -165,7 +167,7 @@ exports.changeView = async (req, res) => {
 
 exports.getnoticeboards = async (req, res) => {
     try {
-        const noticeboards = await NoticeBoard.find({ organization: req.params.orgid }).populate('selectednotices')
+        const noticeboards = await NoticeBoard.find({ organization: req.params.orgid }).populate({ path: 'organization', select: 'name' })
         res.json({ success: true, noticeboards: noticeboards })
     } catch (error) {
         res.json({ success: false, message: error.message })
@@ -183,7 +185,7 @@ exports.setnoticestatus = async (req, res) => {
 
 exports.getnoticeboard = async (req, res) => {
     try {
-        const noticeboard = await NoticeBoard.findOne({ _id: req.params.id }).populate({ path: 'selectednotices', populate: { path: "material" } })
+        const noticeboard = await NoticeBoard.findOne({ _id: req.params.id }).populate({ path: 'organization', select: 'name' }).populate({ path: 'notice', populate: 'materials' })
         res.json({ success: true, noticeboard: noticeboard })
 
     } catch (error) {
@@ -206,3 +208,32 @@ exports.toggleheadline = async (req, res) => {
     }
 }
 
+exports.addnoticesets = async (req, res) => {
+    try {
+        const noticesetobject = req.body;
+        noticesetobject.organization = req.params.orgid
+        const noticeset = new NoticeSets(noticesetobject)
+        await noticeset.save()
+        res.json({ success: true, message: `Successfully added noticesets ${noticeset.name}` })
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+exports.getnoticesets = async (req, res) => {
+    try {
+        const noticesets = await NoticeSets.find({ organization: req.params.orgid }).populate('materials')
+        res.json({ success: true, noticesets: noticesets })
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+exports.setnoticeset = async (req, res) => {
+    try {
+        await NoticeBoard.updateOne({ _id: req.params.boardid }, { $set: { notice: req.body.noticeset } })
+        res.json({ success: true, message: "Successfully set notice" })
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}

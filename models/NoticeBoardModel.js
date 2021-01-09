@@ -9,24 +9,13 @@ const NoticeBoardSchema = new Schema({
     //     type: String,
     //     required: true
     // },
-    lastUpdateid: {
-        type: String,
-    },
-    updateSwitch: {
-        type: Boolean,
-        default: false,
-    },
-    displaytype: {
-        type: String,
-        default: "grid"
-    },
     organization: {
         type: Schema.Types.ObjectId,
         ref: 'Organization'
     },
-    headline: {
-        type: Boolean,
-        default: false
+    notice: {
+        type: Schema.Types.ObjectId,
+        ref: 'NoticeSet',
     },
     selectednotices: [{
         type: Schema.Types.ObjectId,
