@@ -92,7 +92,7 @@ exports.adminUploads = async (req, res) => {
     const file = req.file;
     const values = JSON.parse(req.body.values);
     // console.log(file);
-    exec(`mv ${file.path} /assets`, (error, stdout, stderr) => {
+    exec(`mv ${file.path} /assets`, async (error, stdout, stderr) => {
       if (error) {
         res.json({ success: false, message: error.message });
       } else if (stderr) {
