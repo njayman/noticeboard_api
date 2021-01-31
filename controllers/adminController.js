@@ -114,7 +114,6 @@ exports.adminUploads = async (req, res) => {
     //     res.json({ success: true, message: "Successfully uploaded material" });
     //   }
     // });
-    https: res.json({ success: true, message: "ok" });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
