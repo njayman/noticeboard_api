@@ -98,7 +98,7 @@ exports.adminUploads = async (req, res) => {
       } else if (stderr) {
         res.json({ success: false, message: stderr.toString() });
       } else {
-        values.material = `kernel.ap-south-1.linodeobjects.com/${file.filename}`;
+        values.material = `https://kernel.ap-south-1.linodeobjects.com/${file.filename}`;
         const material = new Material(values);
         await material.save();
         console.log(`kernel.ap-south-1.linodeobjects.com/${file.filename}`);
