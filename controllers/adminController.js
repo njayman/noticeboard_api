@@ -91,18 +91,19 @@ exports.adminUploads = async (req, res) => {
   try {
     const file = req.file;
     const values = JSON.parse(req.body.values);
-    console.log(file);
+    // console.log(file);
     exec(`mv ${file.path} /assets`, (error, stdout, stderr) => {
       if (error) {
-        console.log(`error: ${error.message}`);
-        return;
+        res.json({ success: false, message: error.message });
+      } else if (stderr) {
+        res.json({ success: false, message: stderr.toString() });
+      } else {
+        values.material = `kernel.ap-south-1.linodeobjects.com/${file.filename}`;
+        console.log(`kernel.ap-south-1.linodeobjects.com/${file.filename}`);
+        res.json({ success: true, message: "Successfully uploaded material" });
       }
-      if (stderr) {
-        console.log(`stderr: ${stderr}`);
-        return;
-      }
-      console.log(`stdout: ${stdout}`);
     });
+    //
     // cloudinary.uploader.upload(file.path, async (error, response) => {
     //   if (error) {
     //     res.json({ success: false, message: error.message });
@@ -113,7 +114,7 @@ exports.adminUploads = async (req, res) => {
     //     res.json({ success: true, message: "Successfully uploaded material" });
     //   }
     // });
-    res.json({ success: true, message: "ok" });
+    https: res.json({ success: true, message: "ok" });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
