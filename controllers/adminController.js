@@ -99,6 +99,8 @@ exports.adminUploads = async (req, res) => {
         res.json({ success: false, message: stderr.toString() });
       } else {
         values.material = `kernel.ap-south-1.linodeobjects.com/${file.filename}`;
+        const material = new Material(values);
+        await material.save();
         console.log(`kernel.ap-south-1.linodeobjects.com/${file.filename}`);
         res.json({ success: true, message: "Successfully uploaded material" });
       }
