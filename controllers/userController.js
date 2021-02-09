@@ -90,10 +90,17 @@ exports.joinOrganization = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+exports.getOrganizations = async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.params.id });
+    res.json({ success: true, organizations: user.organizations });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
 exports.getNotices = async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.params.id });
-    console.log(user);
     if (user && user.organizations.includes(req.params.orgid)) {
       const organization = await Organization.findOne({
         _id: req.params.orgid,
