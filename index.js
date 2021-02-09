@@ -2,7 +2,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const admin = require('firebase-admin/admin')
+const admin = require("./firebase-admin/admin")
 
 const { PORT, DBNAME, DBUSER, DBPASSWORD } = process.env;
 const app = express();
@@ -54,9 +54,9 @@ server.listen(PORT, () => {
       {
         notification: {
           title: 'Test notification',
-          body: 'Testing this notification thing from firebase'
+          body: 'Testing this notification thing from firebase-admin'
         },
-        topic: 'Test topic'
+        topic: 'TestTopic'
       }
   )
       .then((response) => {
