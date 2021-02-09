@@ -92,7 +92,10 @@ exports.joinOrganization = async (req, res) => {
 };
 exports.getOrganizations = async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.params.id });
+    const user = await User.findOne({ _id: req.params.id }).populate({
+      path: "organizations",
+      select: "name joinCode",
+    });
     res.json({ success: true, organizations: user.organizations });
   } catch (error) {
     res.json({ success: false, message: error.message });
