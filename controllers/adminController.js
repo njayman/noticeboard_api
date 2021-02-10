@@ -91,20 +91,26 @@ exports.adminUploads = async (req, res) => {
   try {
     const file = req.file;
     const values = JSON.parse(req.body.values);
-    // console.log(file);
-    exec(`mv ${file.path} /assets`, async (error, stdout, stderr) => {
-      if (error) {
-        res.json({ success: false, message: error.message });
-      } else if (stderr) {
-        res.json({ success: false, message: stderr.toString() });
-      } else {
-        values.material = `https://kernel.ap-south-1.linodeobjects.com/${file.filename}`;
-        const material = new Material(values);
-        await material.save();
-        console.log(`kernel.ap-south-1.linodeobjects.com/${file.filename}`);
-        res.json({ success: true, message: "Successfully uploaded material" });
+    console.log(file);
+    exec(
+      `mv ${file.path} ${process.env.ASSETFOLDER}`,
+      async (error, stdout, stderr) => {
+        if (error) {
+          res.json({ success: false, message: error.message });
+        } else if (stderr) {
+          res.json({ success: false, message: stderr.toString() });
+        } else {
+          values.material = `https://kernel.ap-south-1.linodeobjects.com/${file.filename}`;
+          const material = new Material(values);
+          await material.save();
+          console.log(`kernel.ap-south-1.linodeobjects.com/${file.filename}`);
+          res.json({
+            success: true,
+            message: "Successfully uploaded material",
+          });
+        }
       }
-    });
+    );
     //
     // cloudinary.uploader.upload(file.path, async (error, response) => {
     //   if (error) {
