@@ -26,6 +26,7 @@ exports.loginUser = async (req, res) => {
               success: true,
               message: `Successfully logged in as user ${user.fullname}`,
               token: token,
+              uid: user._id
             });
           } else {
             res.json({ success: false, message: `Password does not match` });
@@ -35,7 +36,7 @@ exports.loginUser = async (req, res) => {
     } else {
       res.json({
         success: false,
-        message: `User with eail ${req.body.email} not found`,
+        message: `User with email ${req.body.email} not found`,
       });
     }
   } catch (error) {
@@ -59,6 +60,7 @@ exports.registerUser = async (req, res) => {
           res.json({
             success: true,
             message: `Successfully joined as user ${registerdata.fullname}`,
+            uid: user._id
           });
         }
       });
