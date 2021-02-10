@@ -4,8 +4,10 @@ const storage = multer.diskStorage({
     cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = file.originalname;
-    cb(null, uniqueSuffix);
+    const uniqueSuffix = file.originalname.trim();
+    let ext = uniqueSuffix.substring(uniqueSuffix.lastIndexOf(".") + 1);
+    let newname = `Image${Math.random().toString(36).slice(2)}.${ext}`;
+    cb(null, newname);
   },
 });
 
