@@ -131,3 +131,23 @@ exports.getNotices = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+exports.getBoards = async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.params.id });
+    if (user && user.organizations.includes(req.params.orgid)) {
+      const organization = await Organization.findOne({
+        _id: req.params.orgid,
+      })
+        .select("name boards")
+        .populate({
+          path: "boards",
+          select: "name",
+        });
+      res.json({ success: true, boards: organization.boards });
+    } else {
+      res.json({ success: false, message: "User not found" });
+    }
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
