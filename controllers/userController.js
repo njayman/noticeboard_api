@@ -5,7 +5,6 @@ const Organization = require("../models/OrganizationModel");
 
 exports.loginUser = async (req, res) => {
   try {
-    console.log(req.body)
     const user = await User.findOne({ email: req.body.email });
     if (user) {
       bcrypt.compare(req.body.password, user.password, function (err, result) {
