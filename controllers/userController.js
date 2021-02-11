@@ -71,22 +71,42 @@ exports.joinOrganization = async (req, res) => {
     const organization = await Organization.findOne({
       joinCode: req.body.joincode,
     });
+
     if (organization) {
-      await User.updateOne(
-        { _id: req.params.id },
-        { $push: { organizations: organization._id } }
-      );
-      res.json({
-        success: true,
-        message: `Successfully joined in ${organization.name}`,
-      });
+      let user = await User.findOne({ _id: req.params.id });
+
+      if (user.organizations.length) {
+        
+        user.organizations.forEach((organizationID) => {
+
+          if (organizationID.toString() === organization._id.toString()) {
+            
+            res.json({
+              success: false,
+               message: `You are already joined in ${organization.name}`,
+            });
+          }
+        })
+        await User.updateOne(
+          { _id: req.params.id },
+          { $push: { organizations: organization._id } }
+        );
+        res.json({
+          success: true,
+          message: `Successfully joined in ${organization.name}`,
+        });
+          
+      
+        
+      }
     } else {
       res.json({
         success: false,
         message: `Organization not found`,
       });
     }
-  } catch (error) {
+  }
+  catch (error) {
     res.json({ success: false, message: error.message });
   }
 };
