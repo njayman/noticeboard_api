@@ -2,7 +2,8 @@ const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
 const Organization = require("../models/OrganizationModel");
-
+const NoticeBoardModel = require("../models/NoticeBoardModel");
+const NoticeSetsModel = require("../models/NoticeSetsModel");
 exports.loginUser = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
@@ -114,24 +115,17 @@ exports.getOrganizations = async (req, res) => {
 exports.getNotices = async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.params.id });
-    if (user && user.organizations.includes(req.params.orgid)) {
-      const organization = await Organization.findOne({
-        _id: req.params.orgid,
+    const board = await NoticeBoardModel.findOne({ _id: req.params.boardid });
+    if (user && user.organizations.includes(board.organization)) {
+      const notices = await NoticeSetsModel.findOne({
+        _id: board.notice,
       })
-        .select("name boards")
+        .select("name materials")
         .populate({
-          path: "boards",
-          select: "name notice",
-          populate: {
-            path: "notice",
-            select: "materials",
-            populate: {
-              path: "materials",
-              select: "name material materialtype",
-            },
-          },
+          path: "materials",
+          select: "name material materialtype",
         });
-      res.json({ success: true, notices: organization });
+      res.json({ success: true, notices: notices });
     } else {
       res.json({ success: false, message: "User not found" });
     }
