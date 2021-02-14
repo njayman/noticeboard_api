@@ -20,6 +20,9 @@ const OrganizationSchema = new Schema({
   joinCode: {
     type: String,
   },
+  logo: {
+    type: String,
+  },
 });
 
 module.exports = model("Organization", OrganizationSchema);

@@ -16,6 +16,7 @@ const {
 } = process.env;
 const cloudinary = require("cloudinary").v2;
 const { populate } = require("../models/AdminModel");
+const OrganizationModel = require("../models/OrganizationModel");
 cloudinary.config({
   cloud_name: CLOUDINARY_CLOUD_NAME,
   api_key: CLOUDINARY_API_KEY,
@@ -91,7 +92,7 @@ exports.adminUploads = async (req, res) => {
   try {
     const file = req.file;
     const values = JSON.parse(req.body.values);
-    console.log(file);
+    //console.log(file);
     exec(
       `mv ${file.path} ${process.env.ASSETFOLDER}`,
       async (error, stdout, stderr) => {
@@ -329,6 +330,57 @@ exports.updatenoticeset = async (req, res) => {
       }
     );
     res.json({ success: true, message: "Successfully updated noticeset" });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+exports.changeLogo = async (req, res) => {
+  try {
+    const file = req.file;
+    exec(
+      `mv ${file.path} ${process.env.ASSETFOLDER}`,
+      async (error, stdout, stderr) => {
+        if (error) {
+          res.json({ success: false, message: error.message });
+        } else if (stderr) {
+          res.json({ success: false, message: stderr.toString() });
+        } else {
+          const logourl = `https://kernel.ap-south-1.linodeobjects.com/${file.filename}`;
+          await OrganizationModel.updateOne(
+            { _id: req.params.id },
+            { $set: { logo: logourl } }
+          );
+
+          res.json({
+            success: true,
+            message: "Successfully uploaded material",
+          });
+        }
+      }
+    );
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+exports.changeOrgName = async (req, res) => {
+  try {
+    await OrganizationModel.updateOne(
+      { _id: req.params.id },
+      { $set: { name: req.body.name } }
+    );
+    res.json({ success: true, message: "hey" });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+exports.getOrgName = async (req, res) => {
+  try {
+    const org = await OrganizationModel.findOne({ _id: req.params.id });
+    res.json({ success: true, orgname: org.name, logo: org.logo });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }
