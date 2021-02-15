@@ -276,21 +276,21 @@ exports.setnoticeset = async (req, res) => {
       { $set: { notice: req.body.noticeset } }
     );
     // Insert FCM notification code here
-    admin
-      .messaging()
-      .send({
-        notification: {
-          title: `A new notice has been posted on ${board.name}`,
-          body: `Tap to open the noticeboard`,
-        },
-        topic: board.organization,
-      })
-      .then((response) => {
-        console.log("Notification sent out successfully. " + response);
-      })
-      .catch((err) => {
-        console.log("Error sending out notification. " + err);
-      });
+    admin.messaging().send(
+        {
+          notification: {
+            title: `A new notice has been posted on ${board.name}`,
+            body: `Tap to open the noticeboard`
+          },
+          topic: `${board.organization}`
+        }
+    )
+        .then( (response) => {
+          console.log("Notification sent out successfully. " + response);
+        })
+        .catch( (err) => {
+          console.log("Error sending out notification. " + err);
+        });
     res.json({ success: true, message: "Successfully set notice" });
   } catch (error) {
     res.json({ success: false, message: error.message });
