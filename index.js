@@ -50,19 +50,4 @@ app.use("/user", userRoute);
 //listener
 server.listen(PORT, () => {
   console.log("Server is up!");
-  admin.messaging().send(
-      {
-        notification: {
-          title: 'Test notification',
-          body: 'Testing this notification thing from firebase-admin'
-        },
-        topic: 'TestTopic'
-      }
-  )
-      .then((response) => {
-        console.log('Test notification sent out successfully. Message: ' + response);
-      })
-      .catch((err) => {
-        console.log('Error sending test notification. Message: ' + err);
-      });
 });
