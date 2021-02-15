@@ -7,6 +7,7 @@ const Organization = require("../models/OrganizationModel");
 const NoticeBoard = require("../models/NoticeBoardModel");
 const NoticeSets = require("../models/NoticeSetsModel");
 const { exec } = require("child_process");
+const admin = require("../firebase-admin/admin");
 
 const {
   JWTSECRET,
@@ -295,10 +296,27 @@ exports.getnoticesets = async (req, res) => {
 
 exports.setnoticeset = async (req, res) => {
   try {
+    const board = await NoticeBoard.findById(req.params.boardid);
     await NoticeBoard.updateOne(
       { _id: req.params.boardid },
       { $set: { notice: req.body.noticeset } }
     );
+    // Insert FCM notification code here
+    admin.messaging().send(
+        {
+          notification: {
+            title: `A new notice has been posted ${board.name}`,
+            body: `Tap to open the noticeboard`
+          },
+          topic: board.id
+        }
+    )
+        .then( (response) => {
+          console.log("Notification sent out successfully. " + response);
+        })
+        .catch( (err) => {
+          console.log("Error sending out notification. " + err);
+        });
     res.json({ success: true, message: "Successfully set notice" });
   } catch (error) {
     res.json({ success: false, message: error.message });
@@ -316,6 +334,7 @@ exports.getnoticeset = async (req, res) => {
   }
 };
 
+// IMP
 exports.updatenoticeset = async (req, res) => {
   try {
     await NoticeSets.updateOne(
