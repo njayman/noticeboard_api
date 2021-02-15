@@ -365,7 +365,7 @@ exports.updatenoticeset = async (req, res) => {
             title: `A notice has been updated on ${boardNames}`,
             body: `Tap to open noticeboard`
           },
-          topic: noticeset.organization
+          topic: `${noticeset.organization}`
         }
     )
         .then( (response) => {
