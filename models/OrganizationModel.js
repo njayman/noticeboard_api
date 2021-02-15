@@ -22,6 +22,7 @@ const OrganizationSchema = new Schema({
   },
   logo: {
     type: String,
+    default: "",
   },
 });
 

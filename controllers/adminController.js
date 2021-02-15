@@ -8,21 +8,6 @@ const NoticeBoard = require("../models/NoticeBoardModel");
 const NoticeSets = require("../models/NoticeSetsModel");
 const { exec } = require("child_process");
 
-const {
-  JWTSECRET,
-  CLOUDINARY_CLOUD_NAME,
-  CLOUDINARY_API_KEY,
-  CLOUDINARY_API_SECRET,
-} = process.env;
-const cloudinary = require("cloudinary").v2;
-const { populate } = require("../models/AdminModel");
-const OrganizationModel = require("../models/OrganizationModel");
-cloudinary.config({
-  cloud_name: CLOUDINARY_CLOUD_NAME,
-  api_key: CLOUDINARY_API_KEY,
-  api_secret: CLOUDINARY_API_SECRET,
-});
-
 exports.adminRegister = async (req, res) => {
   try {
     const adminObject = req.body;
@@ -112,17 +97,6 @@ exports.adminUploads = async (req, res) => {
         }
       }
     );
-    //
-    // cloudinary.uploader.upload(file.path, async (error, response) => {
-    //   if (error) {
-    //     res.json({ success: false, message: error.message });
-    //   } else if (response) {
-    //     values.material = response.url;
-    //     const material = new Material(values);
-    //     await material.save();
-    //     res.json({ success: true, message: "Successfully uploaded material" });
-    //   }
-    // });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -347,7 +321,7 @@ exports.changeLogo = async (req, res) => {
           res.json({ success: false, message: stderr.toString() });
         } else {
           const logourl = `https://kernel.ap-south-1.linodeobjects.com/${file.filename}`;
-          await OrganizationModel.updateOne(
+          await Organization.updateOne(
             { _id: req.params.id },
             { $set: { logo: logourl } }
           );
@@ -367,7 +341,7 @@ exports.changeLogo = async (req, res) => {
 
 exports.changeOrgName = async (req, res) => {
   try {
-    await OrganizationModel.updateOne(
+    await Organization.updateOne(
       { _id: req.params.id },
       { $set: { name: req.body.name } }
     );

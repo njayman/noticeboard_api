@@ -105,7 +105,7 @@ exports.getOrganizations = async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.params.id }).populate({
       path: "organizations",
-      select: "name joinCode",
+      select: "name joinCode logo",
     });
     res.json({ success: true, organizations: user.organizations });
   } catch (error) {
