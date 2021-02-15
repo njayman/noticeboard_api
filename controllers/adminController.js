@@ -305,10 +305,10 @@ exports.setnoticeset = async (req, res) => {
     admin.messaging().send(
         {
           notification: {
-            title: `A new notice has been posted ${board.name}`,
+            title: `A new notice has been posted on ${board.name}`,
             body: `Tap to open the noticeboard`
           },
-          topic: board.id
+          topic: board.organization
         }
     )
         .then( (response) => {
@@ -337,7 +337,9 @@ exports.getnoticeset = async (req, res) => {
 // IMP
 exports.updatenoticeset = async (req, res) => {
   try {
-    await NoticeSets.updateOne(
+    const noticeset = await NoticeSets.findById(req.params.id);
+    const affectedBoards = await NoticeBoard.find({ organization: noticeset.organization, notice: req.params.id });
+    const updatedNoticeSet = await NoticeSets.updateOne(
       { _id: req.params.id },
       {
         $set: {
@@ -348,6 +350,30 @@ exports.updatenoticeset = async (req, res) => {
         },
       }
     );
+    let boardNames = '';
+    for ( let i = 0 ; i < affectedBoards.length ; i++ )
+    {
+      console.log(affectedBoards[i].name);
+      boardNames += affectedBoards[i].name + " ";
+    }
+    console.log(boardNames);
+    // Check if the update actually worked
+    // Place FCM notification and response sending here
+    admin.messaging().send(
+        {
+          notification: {
+            title: `A notice has been updated on ${board.name}`,
+            body: `Tap to open noticeboard`
+          },
+          topic: noticeset.organization
+        }
+    )
+        .then( (response) => {
+          console.log("Notification sent out successfully. " + response);
+        })
+        .catch( (err) => {
+          console.log("Error sending out notification. " + err);
+        });
     res.json({ success: true, message: "Successfully updated noticeset" });
   } catch (error) {
     res.json({ success: false, message: error.message });
