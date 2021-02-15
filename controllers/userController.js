@@ -91,6 +91,7 @@ exports.joinOrganization = async (req, res) => {
         res.json({
           success: false,
           message: `You are already joined in ${organization.name}`,
+          organization: organization,
         });
       } else {
         await User.updateOne(
