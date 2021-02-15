@@ -91,6 +91,7 @@ exports.joinOrganization = async (req, res) => {
         res.json({
           success: true,
           message: `Successfully joined in ${organization.name}`,
+          organization: organization
         });
       }
     } else {
