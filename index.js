@@ -2,6 +2,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const admin = require("./firebase-admin/admin")
 
 const { PORT, DBNAME, DBUSER, DBPASSWORD } = process.env;
 const app = express();
@@ -47,4 +48,6 @@ app.use("/master", masterRoute);
 app.use("/user", userRoute);
 
 //listener
-server.listen(PORT, () => console.log("Server is up!"));
+server.listen(PORT, () => {
+  console.log("Server is up!");
+});
