@@ -362,7 +362,7 @@ exports.updatenoticeset = async (req, res) => {
     admin.messaging().send(
         {
           notification: {
-            title: `A notice has been updated on ${board.name}`,
+            title: `A notice has been updated on ${boardNames}`,
             body: `Tap to open noticeboard`
           },
           topic: noticeset.organization
