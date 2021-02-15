@@ -2,7 +2,8 @@ const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
 const Organization = require("../models/OrganizationModel");
-
+const NoticeBoardModel = require("../models/NoticeBoardModel");
+const NoticeSetsModel = require("../models/NoticeSetsModel");
 exports.loginUser = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
@@ -68,20 +69,30 @@ exports.registerUser = async (req, res) => {
   });
 };
 exports.forgetPassword = async (req, res) => {};
+
 exports.joinOrganization = async (req, res) => {
   try {
-    const organization = await Organization.findOne({
-      joinCode: req.body.joincode,
-    });
-    if (organization) {
-      await User.updateOne(
-        { _id: req.params.id },
-        { $push: { organizations: organization._id } }
-      );
-      res.json({
-        success: true,
-        message: `Successfully joined in ${organization.name}`,
+    if (await Organization.exists({ joinCode: req.body.joincode })) {
+      const organization = await Organization.findOne({
+        joinCode: req.body.joincode,
       });
+      let user = await User.findOne({ _id: req.params.id });
+
+      if (user.organizations.includes(organization._id)) {
+        res.json({
+          success: false,
+          message: `You are already joined in ${organization.name}`,
+        });
+      } else {
+        await User.updateOne(
+          { _id: req.params.id },
+          { $push: { organizations: organization._id } }
+        );
+        res.json({
+          success: true,
+          message: `Successfully joined in ${organization.name}`,
+        });
+      }
     } else {
       res.json({
         success: false,
@@ -106,24 +117,17 @@ exports.getOrganizations = async (req, res) => {
 exports.getNotices = async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.params.id });
-    if (user && user.organizations.includes(req.params.orgid)) {
-      const organization = await Organization.findOne({
-        _id: req.params.orgid,
+    const board = await NoticeBoardModel.findOne({ _id: req.params.boardid });
+    if (user && user.organizations.includes(board.organization)) {
+      const notices = await NoticeSetsModel.findOne({
+        _id: board.notice,
       })
-        .select("name boards")
+        .select("name materials")
         .populate({
-          path: "boards",
-          select: "name notice",
-          populate: {
-            path: "notice",
-            select: "materials",
-            populate: {
-              path: "materials",
-              select: "name material materialtype",
-            },
-          },
+          path: "materials",
+          select: "name material materialtype",
         });
-      res.json({ success: true, notices: organization });
+      res.json({ success: true, notices: notices });
     } else {
       res.json({ success: false, message: "User not found" });
     }
@@ -147,6 +151,21 @@ exports.getBoards = async (req, res) => {
     } else {
       res.json({ success: false, message: "User not found" });
     }
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+exports.unsubscribe = async (req, res) => {
+  try {
+    await User.updateOne(
+      { _id: req.params.id },
+      { $pull: { organizations: req.params.orgid } }
+    );
+    res.json({
+      success: true,
+      message: "Successfully unsubscribed from organization",
+    });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }
