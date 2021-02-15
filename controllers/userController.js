@@ -4,6 +4,7 @@ var jwt = require("jsonwebtoken");
 const Organization = require("../models/OrganizationModel");
 const NoticeBoardModel = require("../models/NoticeBoardModel");
 const NoticeSetsModel = require("../models/NoticeSetsModel");
+const UserModel = require("../models/UserModel");
 exports.loginUser = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
@@ -27,7 +28,7 @@ exports.loginUser = async (req, res) => {
               success: true,
               message: `Successfully logged in as user ${user.fullname}`,
               token: token,
-              uid: user._id
+              uid: user._id,
             });
           } else {
             res.json({ success: false, message: `Password does not match` });
@@ -45,28 +46,36 @@ exports.loginUser = async (req, res) => {
   }
 };
 exports.registerUser = async (req, res) => {
-  const registerdata = req.body;
-  const saltRounds = 10;
-  bcrypt.genSalt(saltRounds, async function (err, salt) {
-    if (err) {
-      res.json({ success: false, message: err.message });
-    } else {
-      bcrypt.hash(registerdata.password, salt, async function (err, hash) {
-        if (err) {
-          res.json({ success: false, message: err.message });
-        } else {
-          registerdata.password = hash;
-          const user = new User(registerdata);
-          await user.save();
-          res.json({
-            success: true,
-            message: `Successfully joined as user ${registerdata.fullname}`,
-            uid: user._id
-          });
-        }
-      });
-    }
-  });
+  if (await UserModel.exists({ email: req.body.email })) {
+    res.json({
+      success: true,
+      message: `You are already registered with email ${req.body.email}`,
+      uid: null,
+    });
+  } else {
+    const registerdata = req.body;
+    const saltRounds = 10;
+    bcrypt.genSalt(saltRounds, async function (err, salt) {
+      if (err) {
+        res.json({ success: false, message: err.message });
+      } else {
+        bcrypt.hash(registerdata.password, salt, async function (err, hash) {
+          if (err) {
+            res.json({ success: false, message: err.message });
+          } else {
+            registerdata.password = hash;
+            const user = new User(registerdata);
+            await user.save();
+            res.json({
+              success: true,
+              message: `Successfully joined as user ${registerdata.fullname}`,
+              uid: user._id,
+            });
+          }
+        });
+      }
+    });
+  }
 };
 exports.forgetPassword = async (req, res) => {};
 
@@ -92,7 +101,7 @@ exports.joinOrganization = async (req, res) => {
         res.json({
           success: true,
           message: `Successfully joined in ${organization.name}`,
-          organization: organization
+          organization: organization,
         });
       }
     } else {
@@ -109,7 +118,7 @@ exports.getOrganizations = async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.params.id }).populate({
       path: "organizations",
-      select: "name joinCode",
+      select: "name joinCode logo",
     });
     res.json({ success: true, organizations: user.organizations });
   } catch (error) {

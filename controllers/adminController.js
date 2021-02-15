@@ -8,22 +8,7 @@ const NoticeBoard = require("../models/NoticeBoardModel");
 const NoticeSets = require("../models/NoticeSetsModel");
 const { exec } = require("child_process");
 const admin = require("../firebase-admin/admin");
-
-const {
-  JWTSECRET,
-  CLOUDINARY_CLOUD_NAME,
-  CLOUDINARY_API_KEY,
-  CLOUDINARY_API_SECRET,
-} = process.env;
-const cloudinary = require("cloudinary").v2;
-const { populate } = require("../models/AdminModel");
-const OrganizationModel = require("../models/OrganizationModel");
-cloudinary.config({
-  cloud_name: CLOUDINARY_CLOUD_NAME,
-  api_key: CLOUDINARY_API_KEY,
-  api_secret: CLOUDINARY_API_SECRET,
-});
-
+const { JWTSECRET } = process.env;
 exports.adminRegister = async (req, res) => {
   try {
     const adminObject = req.body;
@@ -113,17 +98,6 @@ exports.adminUploads = async (req, res) => {
         }
       }
     );
-    //
-    // cloudinary.uploader.upload(file.path, async (error, response) => {
-    //   if (error) {
-    //     res.json({ success: false, message: error.message });
-    //   } else if (response) {
-    //     values.material = response.url;
-    //     const material = new Material(values);
-    //     await material.save();
-    //     res.json({ success: true, message: "Successfully uploaded material" });
-    //   }
-    // });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -338,7 +312,10 @@ exports.getnoticeset = async (req, res) => {
 exports.updatenoticeset = async (req, res) => {
   try {
     const noticeset = await NoticeSets.findById(req.params.id);
-    const affectedBoards = await NoticeBoard.find({ organization: noticeset.organization, notice: req.params.id });
+    const affectedBoards = await NoticeBoard.find({
+      organization: noticeset.organization,
+      notice: req.params.id,
+    });
     const updatedNoticeSet = await NoticeSets.updateOne(
       { _id: req.params.id },
       {
@@ -350,30 +327,29 @@ exports.updatenoticeset = async (req, res) => {
         },
       }
     );
-    let boardNames = '';
-    for ( let i = 0 ; i < affectedBoards.length ; i++ )
-    {
+    let boardNames = "";
+    for (let i = 0; i < affectedBoards.length; i++) {
       console.log(affectedBoards[i].name);
       boardNames += affectedBoards[i].name + " ";
     }
     console.log(boardNames);
     // Check if the update actually worked
     // Place FCM notification and response sending here
-    admin.messaging().send(
-        {
-          notification: {
-            title: `A notice has been updated on ${boardNames}`,
-            body: `Tap to open noticeboard`
-          },
-          topic: `${noticeset.organization}`
-        }
-    )
-        .then( (response) => {
-          console.log("Notification sent out successfully. " + response);
-        })
-        .catch( (err) => {
-          console.log("Error sending out notification. " + err);
-        });
+    admin
+      .messaging()
+      .send({
+        notification: {
+          title: `A notice has been updated on ${boardNames}`,
+          body: `Tap to open noticeboard`,
+        },
+        topic: `${noticeset.organization}`,
+      })
+      .then((response) => {
+        console.log("Notification sent out successfully. " + response);
+      })
+      .catch((err) => {
+        console.log("Error sending out notification. " + err);
+      });
     res.json({ success: true, message: "Successfully updated noticeset" });
   } catch (error) {
     res.json({ success: false, message: error.message });
@@ -392,7 +368,7 @@ exports.changeLogo = async (req, res) => {
           res.json({ success: false, message: stderr.toString() });
         } else {
           const logourl = `https://kernel.ap-south-1.linodeobjects.com/${file.filename}`;
-          await OrganizationModel.updateOne(
+          await Organization.updateOne(
             { _id: req.params.id },
             { $set: { logo: logourl } }
           );
@@ -412,7 +388,7 @@ exports.changeLogo = async (req, res) => {
 
 exports.changeOrgName = async (req, res) => {
   try {
-    await OrganizationModel.updateOne(
+    await Organization.updateOne(
       { _id: req.params.id },
       { $set: { name: req.body.name } }
     );
