@@ -215,7 +215,8 @@ exports.getnoticeboard = async (req, res) => {
   try {
     const noticeboard = await NoticeBoard.findOne({ _id: req.params.id })
       .populate({ path: "organization", select: "name" })
-      .populate({ path: "notice", populate: "materials" });
+      .populate({ path: "notice", populate: "materials" })
+      .populate({ path: "splitNoticeSets", populate: "materials" });
     res.json({ success: true, noticeboard: noticeboard });
   } catch (error) {
     res.json({ success: false, message: error.message });
@@ -271,26 +272,33 @@ exports.getnoticesets = async (req, res) => {
 exports.setnoticeset = async (req, res) => {
   try {
     const board = await NoticeBoard.findById(req.params.boardid);
-    await NoticeBoard.updateOne(
-      { _id: req.params.boardid },
-      { $set: { notice: req.body.noticeset } }
-    );
+    if (req.body.isSplit) {
+      await NoticeBoard.updateOne(
+        { _id: req.params.boardid },
+        { $set: { splitNoticeSets: req.body.splitNoticeSets, isSplit: true } }
+      );
+    } else {
+      await NoticeBoard.updateOne(
+        { _id: req.params.boardid },
+        { $set: { notice: req.body.noticeset, isSplit: false } }
+      );
+    }
     // Insert FCM notification code here
-    admin.messaging().send(
-        {
-          notification: {
-            title: `A new notice has been posted on ${board.name}`,
-            body: `Tap to open the noticeboard`
-          },
-          topic: `${board.organization}`
-        }
-    )
-        .then( (response) => {
-          console.log("Notification sent out successfully. " + response);
-        })
-        .catch( (err) => {
-          console.log("Error sending out notification. " + err);
-        });
+    admin
+      .messaging()
+      .send({
+        notification: {
+          title: `A new notice has been posted on ${board.name}`,
+          body: `Tap to open the noticeboard`,
+        },
+        topic: `${board.organization}`,
+      })
+      .then((response) => {
+        console.log("Notification sent out successfully. " + response);
+      })
+      .catch((err) => {
+        console.log("Error sending out notification. " + err);
+      });
     res.json({ success: true, message: "Successfully set notice" });
   } catch (error) {
     res.json({ success: false, message: error.message });

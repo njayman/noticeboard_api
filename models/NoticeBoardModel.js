@@ -17,10 +17,14 @@ const NoticeBoardSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "NoticeSet",
   },
-  selectednotices: [
+  isSplit: {
+    type: Boolean,
+    default: false,
+  },
+  splitNoticeSets: [
     {
       type: Schema.Types.ObjectId,
-      ref: "Notice",
+      ref: "NoticeSet",
     },
   ],
 });
