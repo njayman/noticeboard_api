@@ -108,6 +108,7 @@ exports.joinOrganization = async (req, res) => {
       res.json({
         success: false,
         message: `Organization not found`,
+        organization: {},
       });
     }
   } catch (error) {
@@ -173,9 +174,10 @@ exports.unsubscribe = async (req, res) => {
       { _id: req.params.id },
       { $pull: { organizations: req.params.orgid } }
     );
+    const org = await Organization.findOne({ _id: req.params.orgid });
     res.json({
       success: true,
-      message: "Successfully unsubscribed from organization",
+      message: `Successfully unsubscribed from ${org.name}`,
     });
   } catch (error) {
     res.json({ success: false, message: error.message });

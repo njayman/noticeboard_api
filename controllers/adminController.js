@@ -214,7 +214,7 @@ exports.setnoticestatus = async (req, res) => {
 exports.getnoticeboard = async (req, res) => {
   try {
     const noticeboard = await NoticeBoard.findOne({ _id: req.params.id })
-      .populate({ path: "organization", select: "name" })
+      .populate({ path: "organization", select: "name logo" })
       .populate({ path: "notice", populate: "materials" })
       .populate({ path: "splitNoticeSets", populate: "materials" });
     res.json({ success: true, noticeboard: noticeboard });
