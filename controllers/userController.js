@@ -27,6 +27,7 @@ exports.loginUser = async (req, res) => {
             res.json({
               success: true,
               message: `Successfully logged in as user ${user.fullname}`,
+              username: user.fullname,
               token: token,
               uid: user._id,
             });
