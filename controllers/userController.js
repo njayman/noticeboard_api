@@ -70,6 +70,7 @@ exports.registerUser = async (req, res) => {
             res.json({
               success: true,
               message: `Successfully joined as user ${registerdata.fullname}`,
+              username: user.fullname,
               uid: user._id,
             });
           }
