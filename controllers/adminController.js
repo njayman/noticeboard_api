@@ -291,6 +291,9 @@ exports.setnoticeset = async (req, res) => {
           title: `A new notice has been posted on ${board.name}`,
           body: `Tap to open the noticeboard`,
         },
+        data: {
+          "boardId" : `${board._id}`
+        },
         topic: `${board.organization}`,
       })
       .then((response) => {
