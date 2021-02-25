@@ -290,10 +290,10 @@ exports.setnoticeset = async (req, res) => {
         notification: {
           title: `A new notice has been posted on ${board.name}`,
           body: `Tap to open the noticeboard`,
-          click_action: "FLUTTER_NOTIFICATION_CLICK"
         },
         data: {
-          "boardId" : `${board._id}`
+          "boardId" : `${board._id}`,
+          "click_action": "FLUTTER_NOTIFICATION_CLICK"
         },
         topic: `${board.organization}`,
       })
@@ -353,7 +353,9 @@ exports.updatenoticeset = async (req, res) => {
         notification: {
           title: `A notice has been updated on ${boardNames}`,
           body: `Tap to open noticeboard`,
-          click_action: "FLUTTER_NOTIFICATION_CLICK"
+        },
+        data: {
+          "click_action": "FLUTTER_NOTIFICATION_CLICK"
         },
         topic: `${noticeset.organization}`,
       })
