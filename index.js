@@ -4,6 +4,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const admin = require("./firebase-admin/admin")
+const redis = require('socket.io-redis')
 
 const { PORT, DBNAME, DBUSER, DBPASSWORD } = process.env;
 const app = express();
@@ -16,6 +17,8 @@ const io = require("socket.io")(server, {
     methods: ["GET", "POST"],
   },
 });
+io.adapter(redis({ host: 'localhost', port: 6379 }));
+
 
 //socket handler
 io.on("connect", (socket) => {
