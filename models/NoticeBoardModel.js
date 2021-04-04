@@ -27,6 +27,9 @@ const NoticeBoardSchema = new Schema({
       ref: "NoticeSet",
     },
   ],
+  splitType: {
+    type: String,
+  },
 });
 
 module.exports = model("NoticeBoard", NoticeBoardSchema);

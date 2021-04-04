@@ -272,17 +272,16 @@ exports.getnoticesets = async (req, res) => {
 exports.setnoticeset = async (req, res) => {
   try {
     const board = await NoticeBoard.findById(req.params.boardid);
-    if (req.body.isSplit) {
-      await NoticeBoard.updateOne(
-        { _id: req.params.boardid },
-        { $set: { splitNoticeSets: req.body.splitNoticeSets, isSplit: true } }
-      );
-    } else {
-      await NoticeBoard.updateOne(
-        { _id: req.params.boardid },
-        { $set: { notice: req.body.noticeset, isSplit: false } }
-      );
-    }
+    await NoticeBoard.updateOne(
+      { _id: req.params.boardid },
+      {
+        $set: {
+          splitNoticeSets: req.body.splitNoticeSets,
+          splitType: req.body.splitType,
+        },
+      }
+    );
+
     // Insert FCM notification code here
     admin
       .messaging()
@@ -292,7 +291,7 @@ exports.setnoticeset = async (req, res) => {
           body: `Tap to open the noticeboard`,
         },
         data: {
-          "boardId" : `${board._id}`
+          boardId: `${board._id}`,
         },
         topic: `${board.organization}`,
       })
@@ -411,7 +410,7 @@ exports.changeOrgName = async (req, res) => {
 
 exports.getOrgName = async (req, res) => {
   try {
-    const org = await OrganizationModel.findOne({ _id: req.params.id });
+    const org = await Organization.findOne({ _id: req.params.id });
     res.json({ success: true, orgname: org.name, logo: org.logo });
   } catch (error) {
     res.json({ success: false, message: error.message });
