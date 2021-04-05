@@ -8,6 +8,8 @@ const NoticeBoard = require("../models/NoticeBoardModel");
 const NoticeSets = require("../models/NoticeSetsModel");
 const { exec } = require("child_process");
 const admin = require("../firebase-admin/admin");
+const FormData = require("form-data");
+const axios = require("axios");
 const { JWTSECRET } = process.env;
 exports.adminRegister = async (req, res) => {
   try {
@@ -78,28 +80,30 @@ exports.adminUploads = async (req, res) => {
   try {
     const file = req.file;
     const values = JSON.parse(req.body.values);
-    //console.log(file);
-    exec(
-      `mv ${file.path} ${process.env.ASSETFOLDER}`,
-      async (error, stdout, stderr) => {
-        if (error) {
-          res.json({ success: false, message: error.message });
-        } else if (stderr) {
-          res.json({ success: false, message: stderr.toString() });
-        } else {
-          values.material = `https://kernel.ap-south-1.linodeobjects.com/${file.filename}`;
-          const material = new Material(values);
-          await material.save();
-          console.log(`kernel.ap-south-1.linodeobjects.com/${file.filename}`);
-          res.json({
-            success: true,
-            message: "Successfully uploaded material",
-          });
-        }
-      }
+    const form = new FormData();
+    console.log(file);
+    form.append("file", file.buffer, { filename: file.originalname });
+    const config = {
+      headers: {
+        "Content-Type": `multipart/form-data; boundary=${form.getBoundary()}`,
+      },
+      maxContentLength: 100000000,
+      maxBodyLength: 1000000000,
+    };
+    const { data } = await axios.post(
+      "https://assetupload.coursebee.com/upload",
+      form,
+      config
     );
+    values.material = data.link;
+    const material = new Material(values);
+    await material.save();
+    res.json({
+      success: true,
+      message: "Successfully uploaded material",
+    });
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
     res.json({ success: false, message: error.message });
   }
 };
