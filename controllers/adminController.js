@@ -81,7 +81,7 @@ exports.adminUploads = async (req, res) => {
     const file = req.file;
     const values = JSON.parse(req.body.values);
     const form = new FormData();
-    console.log(file);
+    // console.log(file);
     form.append("file", file.buffer, { filename: file.originalname });
     const config = {
       headers: {
@@ -103,7 +103,7 @@ exports.adminUploads = async (req, res) => {
       message: "Successfully uploaded material",
     });
   } catch (error) {
-    console.log(error.message);
+    // console.log(error.message);
     res.json({ success: false, message: error.message });
   }
 };
@@ -176,7 +176,7 @@ exports.getselectednotices = async (req, res) => {
 
 exports.changeView = async (req, res) => {
   try {
-    console.log(req.body);
+    // console.log(req.body);
     await NoticeBoard.updateOne(
       { _id: req.params.id },
       {
@@ -197,7 +197,7 @@ exports.getnoticeboards = async (req, res) => {
     const noticeboards = await NoticeBoard.find({
       organization: req.params.orgid,
     }).populate({ path: "organization", select: "name" });
-    console.log(noticeboards);
+    // console.log(noticeboards);
     res.json({ success: true, noticeboards: noticeboards });
   } catch (error) {
     res.json({ success: false, message: error.message });
