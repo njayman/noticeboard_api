@@ -193,6 +193,7 @@ exports.getnoticeboards = async (req, res) => {
     const noticeboards = await NoticeBoard.find({
       organization: req.params.orgid,
     }).populate({ path: "organization", select: "name" });
+    console.log(noticeboards);
     res.json({ success: true, noticeboards: noticeboards });
   } catch (error) {
     res.json({ success: false, message: error.message });

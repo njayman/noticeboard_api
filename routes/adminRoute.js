@@ -30,7 +30,7 @@ const multerUploads = require("../middlewares/multerUpload");
 
 router.post("/register", adminRegister);
 router.post("/login", adminLogin);
-router.post("/upload", authenticateJWT, multerUploads, adminUploads);
+router.post("/upload", multerUploads, adminUploads);
 router.post("/addmaterial", authenticateJWT, addmaterial);
 router.post("/addnotice/:id", authenticateJWT, addnotice);
 router.post("/changeView/:id", authenticateJWT, changeView);
