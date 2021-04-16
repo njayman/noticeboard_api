@@ -30,6 +30,10 @@ const NoticeBoardSchema = new Schema({
   splitType: {
     type: String,
   },
+  headline: {
+    type: String,
+    required: true,
+  },
 });
 
 module.exports = model("NoticeBoard", NoticeBoardSchema);

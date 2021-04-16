@@ -283,6 +283,7 @@ exports.setnoticeset = async (req, res) => {
         $set: {
           splitNoticeSets: req.body.splitNoticeSets,
           splitType: req.body.splitType,
+          headline: req.body.headline,
         },
       }
     );

@@ -1,10 +1,10 @@
-require('dotenv').config()
+require("dotenv").config();
 //imports and declarations
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const admin = require("./firebase-admin/admin")
-const redis = require('socket.io-redis')
+const admin = require("./firebase-admin/admin");
+const redis = require("socket.io-redis");
 
 const { PORT, DBNAME, DBUSER, DBPASSWORD } = process.env;
 const app = express();
@@ -17,28 +17,40 @@ const io = require("socket.io")(server, {
     methods: ["GET", "POST"],
   },
 });
-io.adapter(redis({ host: 'localhost', port: 6379 }));
-
+io.adapter(redis({ host: "localhost", port: 6379 }));
 
 //socket handler
 io.on("connect", (socket) => {
+  socket.on("join", (room) => {
+    console.log(`Socket ${socket.id} joining ${room}`);
+    socket.join(room);
+  });
   console.log(`a user connected with ${socket.id}`);
   socket.on("connected", (boardId) => {
     console.log(boardId);
-    io.emit("update", boardId);
+    // io.emit("update", boardId);
+    io.to(boardId.id).emit("update");
   });
   socket.on("updatedata", (data) => {
-    io.emit("update");
+    console.log(data);
+    io.to(data.id).emit("update");
   });
 });
 
 //mongodb connection
 mongoose
   .connect(
-    `mongodb+srv://${DBUSER}:${DBPASSWORD}@njay.iy3to.mongodb.net/${DBNAME}?retryWrites=true&w=majority`,
+    `mongodb://${DBUSER}:${DBPASSWORD}@localhost:27017/${DBNAME}?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=false`,
     { useNewUrlParser: true, useUnifiedTopology: true }
   )
   .catch((error) => console.log(error));
+
+// mongoose
+// .connect(
+//   `mongodb+srv://${DBUSER}:${DBPASSWORD}@njay.iy3to.mongodb.net/${DBNAME}?retryWrites=true&w=majority`,
+//   { useNewUrlParser: true, useUnifiedTopology: true }
+// )
+// .catch((error) => console.log(error));
 
 //route management
 const masterRoute = require("./routes/masterRoute");
