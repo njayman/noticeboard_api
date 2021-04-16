@@ -6,7 +6,15 @@ const cors = require("cors");
 const admin = require("./firebase-admin/admin");
 const redis = require("socket.io-redis");
 
-const { PORT, DBNAME, DBUSER, DBPASSWORD } = process.env;
+const {
+  PORT,
+  DBNAME,
+  DBUSER,
+  DBPASSWORD,
+  LOCALDBUSER,
+  LOCALDBPASSWORD,
+  DBSOURCE,
+} = process.env;
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -38,11 +46,12 @@ io.on("connect", (socket) => {
 });
 
 //mongodb connection
+let mongoUri = DBSOURCE
+  ? `mongodb://${LOCALDBUSER}:${LOCALDBPASSWORD}@localhost:27017/${DBNAME}?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=false`
+  : `mongodb+srv://${DBUSER}:${DBPASSWORD}@njay.iy3to.mongodb.net/${DBNAME}?retryWrites=true&w=majority`;
+console.log(mongoUri);
 mongoose
-  .connect(
-    `mongodb://${DBUSER}:${DBPASSWORD}@localhost:27017/${DBNAME}?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=false`,
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  )
+  .connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
   .catch((error) => console.log(error));
 
 // mongoose
