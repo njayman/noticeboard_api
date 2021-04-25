@@ -23,6 +23,7 @@ const {
   getnoticeset,
   updatenoticeset,
   changeOrgName,
+  updateRelatedNoticeboards,
 } = require("../controllers/adminController");
 
 const authenticateJWT = require("../middlewares/authenticateJWT");
@@ -46,7 +47,7 @@ router.post("/changelogo/:id", authenticateJWT, multerUploads, changeLogo);
 router.post("/changeorgname/:id", authenticateJWT, changeOrgName);
 
 router.put("/updatenoticeset/:id", authenticateJWT, updatenoticeset);
-
+router.put("/updaternoticeboards", authenticateJWT, updateRelatedNoticeboards);
 router.get("/getmaterials", authenticateJWT, getmaterials);
 router.get("/getmaterial/:id", authenticateJWT, getmaterial);
 router.get("/getnotices", authenticateJWT, getnotices);

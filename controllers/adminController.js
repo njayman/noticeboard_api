@@ -10,6 +10,9 @@ const { exec } = require("child_process");
 const admin = require("../firebase-admin/admin");
 const FormData = require("form-data");
 const axios = require("axios");
+const io = require("socket.io-client");
+const socket = io();
+
 const { JWTSECRET } = process.env;
 exports.adminRegister = async (req, res) => {
   try {
@@ -186,6 +189,9 @@ exports.changeView = async (req, res) => {
         },
       }
     );
+    socket.emit("updatedata", {
+      id: req.params._id,
+    });
     res.json({ success: true, message: `View changed to ${req.body.view}` });
   } catch (error) {
     res.json({ success: false, message: error.message });
@@ -287,6 +293,9 @@ exports.setnoticeset = async (req, res) => {
         },
       }
     );
+    socket.emit("updatedata", {
+      id: board._id,
+    });
 
     // Insert FCM notification code here
     admin
@@ -324,7 +333,27 @@ exports.getnoticeset = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
-
+exports.updateRelatedNoticeboards = async (req, res) => {
+  try {
+    console.log(req.body);
+    const noticeboards = await NoticeBoard.find({
+      organization: req.body.org,
+    });
+    // .populate("splitNoticeSets");
+    let matchedBoards = [];
+    noticeboards.map((nb) => {
+      if (nb.splitNoticeSets.includes(req.body.id)) {
+        socket.emit("updatedata", {
+          id: nb._id,
+        });
+      }
+    });
+    res.json({ success: true });
+  } catch (error) {
+    console.log(error);
+    res.status(404).json({ success: false, message: error.message });
+  }
+};
 // IMP
 exports.updatenoticeset = async (req, res) => {
   try {
@@ -344,6 +373,13 @@ exports.updatenoticeset = async (req, res) => {
         },
       }
     );
+    affectedBoards.map((nb) => {
+      if (nb.splitNoticeSets.includes(req.params.id)) {
+        socket.emit("updatedata", {
+          id: nb._id,
+        });
+      }
+    });
     let boardNames = "";
     for (let i = 0; i < affectedBoards.length; i++) {
       console.log(affectedBoards[i].name);
@@ -423,6 +459,6 @@ exports.getOrgName = async (req, res) => {
     const org = await Organization.findOne({ _id: req.params.id });
     res.json({ success: true, orgname: org.name, logo: org.logo });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    res.status(404).json({ success: false, message: error.message });
   }
 };
