@@ -20,6 +20,8 @@ app.use(express.json());
 app.use(cors());
 const server = require("http").Server(app);
 const io = require("socket.io")(server, {
+  transports: ["websocket"],
+  upgrade: false,
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
@@ -46,13 +48,24 @@ io.on("connect", (socket) => {
 });
 
 //mongodb connection
+
 let mongoUri = DBSOURCE
   ? `mongodb://${LOCALDBUSER}:${LOCALDBPASSWORD}@localhost:27017/${DBNAME}?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=false`
   : `mongodb+srv://${DBUSER}:${DBPASSWORD}@njay.iy3to.mongodb.net/${DBNAME}?retryWrites=true&w=majority`;
-console.log(mongoUri);
-mongoose
-  .connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
-  .catch((error) => console.log(error));
+
+const connectMongose = () => {
+  try {
+    mongoose.connect(mongoUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+connectMongose();
+// console.log(mongoUri);
 
 // mongoose
 // .connect(
@@ -60,6 +73,12 @@ mongoose
 //   { useNewUrlParser: true, useUnifiedTopology: true }
 // )
 // .catch((error) => console.log(error));
+
+// const db = mongoose.connection;
+// db.on("error", console.error.bind(console, "connection error:"));
+// db.once("open", function () {
+//   console.log("connected to database");
+// });
 
 //route management
 const masterRoute = require("./routes/masterRoute");

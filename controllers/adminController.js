@@ -11,7 +11,7 @@ const admin = require("../firebase-admin/admin");
 const FormData = require("form-data");
 const axios = require("axios");
 const io = require("socket.io-client");
-const socket = io();
+const socket = io({ transports: ["websocket"], upgrade: false });
 
 const { JWTSECRET } = process.env;
 exports.adminRegister = async (req, res) => {
