@@ -4,8 +4,10 @@ const {
   adminRegister,
   adminLogin,
   adminUploads,
+  deleteAssets,
   addmaterial,
   changeLogo,
+  changeExtraLogo,
   getmaterials,
   getmaterial,
   getOrgName,
@@ -32,6 +34,7 @@ const multerUploads = require("../middlewares/multerUpload");
 router.post("/register", adminRegister);
 router.post("/login", adminLogin);
 router.post("/upload", multerUploads, adminUploads);
+router.post("/deleteasset/:id", authenticateJWT, deleteAssets);
 router.post("/addmaterial", authenticateJWT, addmaterial);
 router.post("/addnotice/:id", authenticateJWT, addnotice);
 router.post("/changeView/:id", authenticateJWT, changeView);
@@ -43,7 +46,8 @@ router.post(
   authenticateJWT,
   setnoticeset
 );
-router.post("/changelogo/:id", authenticateJWT, multerUploads, changeLogo);
+router.post("/changelogo/:id", multerUploads, changeLogo);
+router.post("/changeextralogo/:id", multerUploads, changeExtraLogo);
 router.post("/changeorgname/:id", authenticateJWT, changeOrgName);
 
 router.put("/updatenoticeset/:id", authenticateJWT, updatenoticeset);

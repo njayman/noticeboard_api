@@ -24,6 +24,10 @@ const OrganizationSchema = new Schema({
     type: String,
     default: "",
   },
+  extra: {
+    type: String,
+    default: "",
+  },
 });
 
 module.exports = model("Organization", OrganizationSchema);

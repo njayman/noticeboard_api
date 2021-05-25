@@ -84,8 +84,14 @@ exports.adminUploads = async (req, res) => {
     const file = req.file;
     const values = JSON.parse(req.body.values);
     const form = new FormData();
-    // console.log(file);
+    console.log(values);
+    const organization = await Organization.findOne({ _id: values.orgid });
+    const orgname = organization.name.replace(/[^a-zA-Z0-9]/g, "");
     form.append("file", file.buffer, { filename: file.originalname });
+    form.append(
+      "filepath",
+      `kernel/noticebee/${orgname}${values.orgid}/materials`
+    );
     const config = {
       headers: {
         "Content-Type": `multipart/form-data; boundary=${form.getBoundary()}`,
@@ -94,7 +100,8 @@ exports.adminUploads = async (req, res) => {
       maxBodyLength: 1000000000,
     };
     const { data } = await axios.post(
-      "https://assetupload.coursebee.com/upload",
+      "http://localhost:5050/upload",
+      // "https://assetupload.coursebee.com/upload",
       form,
       config
     );
@@ -107,6 +114,24 @@ exports.adminUploads = async (req, res) => {
     });
   } catch (error) {
     // console.log(error.message);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+exports.deleteAssets = async (req, res) => {
+  try {
+    const material = await Material.findOne({ _id: req.params.id });
+    const { data } = await axios.post(
+      "https://assetupload.coursebee.com/delete",
+      { link: material.material }
+    );
+    if (data.success) {
+      await Material.deleteOne({ _id: req.params.id });
+      res.json({ success: true, message: "Successfully deleted material" });
+    } else {
+      res.json({ success: false, message: data.message });
+    }
+  } catch (error) {
     res.json({ success: false, message: error.message });
   }
 };
@@ -225,7 +250,7 @@ exports.setnoticestatus = async (req, res) => {
 exports.getnoticeboard = async (req, res) => {
   try {
     const noticeboard = await NoticeBoard.findOne({ _id: req.params.id })
-      .populate({ path: "organization", select: "name logo" })
+      .populate({ path: "organization", select: "name logo extra" })
       .populate({ path: "notice", populate: "materials" })
       .populate({ path: "splitNoticeSets", populate: "materials" });
     res.json({ success: true, noticeboard: noticeboard });
@@ -415,27 +440,74 @@ exports.updatenoticeset = async (req, res) => {
 exports.changeLogo = async (req, res) => {
   try {
     const file = req.file;
-    exec(
-      `mv ${file.path} ${process.env.ASSETFOLDER}`,
-      async (error, stdout, stderr) => {
-        if (error) {
-          res.json({ success: false, message: error.message });
-        } else if (stderr) {
-          res.json({ success: false, message: stderr.toString() });
-        } else {
-          const logourl = `https://kernel.ap-south-1.linodeobjects.com/${file.filename}`;
-          await Organization.updateOne(
-            { _id: req.params.id },
-            { $set: { logo: logourl } }
-          );
-
-          res.json({
-            success: true,
-            message: "Successfully uploaded material",
-          });
-        }
-      }
+    const form = new FormData();
+    // console.log(file);
+    const organization = await Organization.findOne({ _id: req.body.orgid });
+    const orgname = organization.name.replace(/[^a-zA-Z0-9]/g, "");
+    form.append("file", file.buffer, { filename: file.originalname });
+    form.append(
+      "filepath",
+      `kernel/noticebee/${orgname}${req.body.orgid}/logo`
     );
+    const config = {
+      headers: {
+        "Content-Type": `multipart/form-data; boundary=${form.getBoundary()}`,
+      },
+      maxContentLength: 100000000,
+      maxBodyLength: 1000000000,
+    };
+    const { data } = await axios.post(
+      "https://assetupload.coursebee.com/upload",
+      form,
+      config
+    );
+    const logourl = data.link;
+    await Organization.updateOne(
+      { _id: req.params.id },
+      { $set: { logo: logourl } }
+    );
+    res.json({
+      success: true,
+      message: "Successfully uploaded logo",
+    });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+exports.changeExtraLogo = async (req, res) => {
+  try {
+    const file = req.file;
+    const form = new FormData();
+    // console.log(file);
+    const organization = await Organization.findOne({ _id: req.body.orgid });
+    const orgname = organization.name.replace(/[^a-zA-Z0-9]/g, "");
+    form.append("file", file.buffer, { filename: file.originalname });
+    form.append(
+      "filepath",
+      `kernel/noticebee/${orgname}${req.body.orgid}/extralogo`
+    );
+    const config = {
+      headers: {
+        "Content-Type": `multipart/form-data; boundary=${form.getBoundary()}`,
+      },
+      maxContentLength: 100000000,
+      maxBodyLength: 1000000000,
+    };
+    const { data } = await axios.post(
+      "https://assetupload.coursebee.com/upload",
+      form,
+      config
+    );
+    const logourl = data.link;
+    await Organization.updateOne(
+      { _id: req.params.id },
+      { $set: { extra: logourl } }
+    );
+    res.json({
+      success: true,
+      message: "Successfully uploaded extra logo",
+    });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -457,7 +529,12 @@ exports.changeOrgName = async (req, res) => {
 exports.getOrgName = async (req, res) => {
   try {
     const org = await Organization.findOne({ _id: req.params.id });
-    res.json({ success: true, orgname: org.name, logo: org.logo });
+    res.json({
+      success: true,
+      orgname: org.name,
+      logo: org.logo,
+      extra: org.extra,
+    });
   } catch (error) {
     res.status(404).json({ success: false, message: error.message });
   }
