@@ -28,6 +28,14 @@ const OrganizationSchema = new Schema({
     type: String,
     default: "",
   },
+  header: {
+    background: { type: String, default: "#ffffff" },
+    color: { type: String, default: "#1b2845ff" },
+  },
+  headline: {
+    background: { type: String, default: "#ffffff" },
+    color: { type: String, default: "#1b2845ff" },
+  },
 });
 
 module.exports = model("Organization", OrganizationSchema);

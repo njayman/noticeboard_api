@@ -100,8 +100,8 @@ exports.adminUploads = async (req, res) => {
       maxBodyLength: 1000000000,
     };
     const { data } = await axios.post(
-      "http://localhost:5050/upload",
-      // "https://assetupload.coursebee.com/upload",
+      // "http://localhost:5050/upload",
+      "https://assetupload.coursebee.com/upload",
       form,
       config
     );
@@ -168,7 +168,8 @@ exports.addnotice = async (req, res) => {
 
 exports.getmaterials = async (req, res) => {
   try {
-    const materials = await Material.find();
+    const materials = await Material.find({ adminid: req.params.adminid });
+    console.log(materials);
     res.json({ success: true, materials: materials });
   } catch (error) {
     res.json({ success: false, message: error.message });
@@ -250,7 +251,10 @@ exports.setnoticestatus = async (req, res) => {
 exports.getnoticeboard = async (req, res) => {
   try {
     const noticeboard = await NoticeBoard.findOne({ _id: req.params.id })
-      .populate({ path: "organization", select: "name logo extra" })
+      .populate({
+        path: "organization",
+        select: "name logo extra headline header",
+      })
       .populate({ path: "notice", populate: "materials" })
       .populate({ path: "splitNoticeSets", populate: "materials" });
     res.json({ success: true, noticeboard: noticeboard });
@@ -526,6 +530,31 @@ exports.changeOrgName = async (req, res) => {
   }
 };
 
+exports.changeHeaderStyle = async (req, res) => {
+  try {
+    await Organization.updateOne(
+      { _id: req.params.id },
+      { $set: { header: req.body } }
+    );
+    console.log(req.params.id);
+    res.json({ success: true, message: "hey" });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+exports.changeHeadlineStyle = async (req, res) => {
+  try {
+    await Organization.updateOne(
+      { _id: req.params.id },
+      { $set: { headline: req.body } }
+    );
+    res.json({ success: true, message: "hey" });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
 exports.getOrgName = async (req, res) => {
   try {
     const org = await Organization.findOne({ _id: req.params.id });
@@ -534,6 +563,8 @@ exports.getOrgName = async (req, res) => {
       orgname: org.name,
       logo: org.logo,
       extra: org.extra,
+      headline: org.headline,
+      header: org.header,
     });
   } catch (error) {
     res.status(404).json({ success: false, message: error.message });

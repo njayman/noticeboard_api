@@ -8,6 +8,8 @@ const {
   addmaterial,
   changeLogo,
   changeExtraLogo,
+  changeHeaderStyle,
+  changeHeadlineStyle,
   getmaterials,
   getmaterial,
   getOrgName,
@@ -49,10 +51,12 @@ router.post(
 router.post("/changelogo/:id", multerUploads, changeLogo);
 router.post("/changeextralogo/:id", multerUploads, changeExtraLogo);
 router.post("/changeorgname/:id", authenticateJWT, changeOrgName);
+router.post("/headerstyle/:id", changeHeaderStyle);
+router.post("/headlinestyle/:id", changeHeadlineStyle);
 
 router.put("/updatenoticeset/:id", authenticateJWT, updatenoticeset);
 router.put("/updaternoticeboards", authenticateJWT, updateRelatedNoticeboards);
-router.get("/getmaterials", authenticateJWT, getmaterials);
+router.get("/getmaterials/:adminid", authenticateJWT, getmaterials);
 router.get("/getmaterial/:id", authenticateJWT, getmaterial);
 router.get("/getnotices", authenticateJWT, getnotices);
 router.get("/getnoticeboards/:orgid", authenticateJWT, getnoticeboards);

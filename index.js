@@ -45,6 +45,19 @@ io.on("connect", (socket) => {
     console.log(data);
     io.to(data.id).emit("update");
   });
+  socket.on("updatealldata", (data) => {
+    console.log(data);
+    OrganizationModel.findOne({ _id: data.id }, function (err, organization) {
+      if (err) {
+        console.log(err);
+      } else {
+        organization.boards.map((boardid) => {
+          io.to(boardid).emit("update");
+          console.log(boardid);
+        });
+      }
+    });
+  });
 });
 
 //mongodb connection
@@ -85,6 +98,7 @@ const masterRoute = require("./routes/masterRoute");
 const noticeboardRoute = require("./routes/noticeboardRoute");
 const adminRoute = require("./routes/adminRoute");
 const userRoute = require("./routes/userRoute");
+const OrganizationModel = require("./models/OrganizationModel");
 
 app.use("/", noticeboardRoute);
 app.use("/admin", adminRoute);
