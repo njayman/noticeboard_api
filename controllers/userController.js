@@ -5,6 +5,7 @@ const Organization = require("../models/OrganizationModel");
 const NoticeBoardModel = require("../models/NoticeBoardModel");
 const NoticeSetsModel = require("../models/NoticeSetsModel");
 const UserModel = require("../models/UserModel");
+const MaterialModel = require("../models/MaterialModel");
 exports.loginUser = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
@@ -121,27 +122,28 @@ exports.getOrganizations = async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.params.id }).populate({
       path: "organizations",
-      select: "name joinCode logo",
+      select: "name joinCode logo extra", //extra stands for extra logo
     });
     res.json({ success: true, organizations: user.organizations });
   } catch (error) {
+    console.log(error);
     res.json({ success: false, message: error.message });
   }
 };
 exports.getNotices = async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.params.id });
-    const board = await NoticeBoardModel.findOne({ _id: req.params.boardid });
+    const board = await NoticeBoardModel.findOne({ _id: req.params.boardid })
+      .select("name splitNoticeSets headline organization")
+      .populate({
+        path: "splitNoticeSets",
+        select: "materials",
+        populate: { path: "materials", select: "name material materialtype" },
+      });
     if (user && user.organizations.includes(board.organization)) {
-      const notices = await NoticeSetsModel.findOne({
-        _id: board.notice,
-      })
-        .select("name materials")
-        .populate({
-          path: "materials",
-          select: "name material materialtype",
-        });
-      res.json({ success: true, notices: notices });
+      // console.log(board);
+
+      res.json({ success: true, notices: board });
     } else {
       res.json({ success: false, message: "User not found" });
     }
