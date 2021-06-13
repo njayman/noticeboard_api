@@ -10,6 +10,7 @@ const {
   changeExtraLogo,
   changeHeaderStyle,
   changeHeadlineStyle,
+  changeHeadlineTwoStyle,
   getmaterials,
   getmaterial,
   getOrgName,
@@ -28,6 +29,7 @@ const {
   updatenoticeset,
   changeOrgName,
   updateRelatedNoticeboards,
+  pdfUpload,
 } = require("../controllers/adminController");
 
 const authenticateJWT = require("../middlewares/authenticateJWT");
@@ -36,6 +38,7 @@ const multerUploads = require("../middlewares/multerUpload");
 router.post("/register", adminRegister);
 router.post("/login", adminLogin);
 router.post("/upload", multerUploads, adminUploads);
+router.post("/pdfupload", multerUploads, pdfUpload);
 router.post("/deleteasset/:id", authenticateJWT, deleteAssets);
 router.post("/addmaterial", authenticateJWT, addmaterial);
 router.post("/addnotice/:id", authenticateJWT, addnotice);
@@ -53,6 +56,7 @@ router.post("/changeextralogo/:id", multerUploads, changeExtraLogo);
 router.post("/changeorgname/:id", authenticateJWT, changeOrgName);
 router.post("/headerstyle/:id", changeHeaderStyle);
 router.post("/headlinestyle/:id", changeHeadlineStyle);
+router.post("/headlinetwostyle/:id", changeHeadlineTwoStyle);
 
 router.put("/updatenoticeset/:id", authenticateJWT, updatenoticeset);
 router.put("/updaternoticeboards", authenticateJWT, updateRelatedNoticeboards);

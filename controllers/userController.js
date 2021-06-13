@@ -126,7 +126,7 @@ exports.getOrganizations = async (req, res) => {
     });
     res.json({ success: true, organizations: user.organizations });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.json({ success: false, message: error.message });
   }
 };
@@ -141,7 +141,7 @@ exports.getNotices = async (req, res) => {
         populate: { path: "materials", select: "name material materialtype" },
       });
     if (user && user.organizations.includes(board.organization)) {
-      // console.log(board);
+      //  // console.log(board);
 
       res.json({ success: true, notices: board });
     } else {

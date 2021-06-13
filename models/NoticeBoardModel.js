@@ -17,10 +17,6 @@ const NoticeBoardSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "NoticeSet",
   },
-  isSplit: {
-    type: Boolean,
-    default: false,
-  },
   splitNoticeSets: [
     {
       type: Schema.Types.ObjectId,
@@ -32,7 +28,9 @@ const NoticeBoardSchema = new Schema({
   },
   headline: {
     type: String,
-    required: true,
+  },
+  headlineTwo: {
+    type: String,
   },
 });
 

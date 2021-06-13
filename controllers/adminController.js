@@ -12,20 +12,22 @@ const FormData = require("form-data");
 const axios = require("axios");
 const io = require("socket.io-client");
 const socket = io({ transports: ["websocket"], upgrade: false });
+const { fromBuffer } = require("pdf2pic");
+const pdfpagecounter = require("pdf-page-counter");
 
 const { JWTSECRET } = process.env;
 exports.adminRegister = async (req, res) => {
   try {
     const adminObject = req.body;
-    // console.log(adminObject)
+    //  // console.log(adminObject)
     let saltround = 10;
     let salt = await bcrypt.genSalt(saltround);
     //const randompassword = Math.random().toString().slice(-8)
-    //console.log(randompassword)
+    // // console.log(randompassword)
     const hashedPassword = await bcrypt.hash(adminObject.password, salt);
     adminObject.password = hashedPassword;
     const admin = new Admin(adminObject);
-    // console.log(admin)
+    //  // console.log(admin)
     await admin.save();
     res.json({
       success: true,
@@ -38,7 +40,7 @@ exports.adminRegister = async (req, res) => {
 
 exports.adminLogin = async (req, res) => {
   try {
-    // console.log(req.body)
+    //  // console.log(req.body)
     const adminExists = await Admin.exists({ name: req.body.name });
     if (adminExists) {
       const admin = await Admin.findOne({ name: req.body.name });
@@ -84,7 +86,7 @@ exports.adminUploads = async (req, res) => {
     const file = req.file;
     const values = JSON.parse(req.body.values);
     const form = new FormData();
-    console.log(values);
+    // console.log(values);
     const organization = await Organization.findOne({ _id: values.orgid });
     const orgname = organization.name.replace(/[^a-zA-Z0-9]/g, "");
     form.append("file", file.buffer, { filename: file.originalname });
@@ -113,7 +115,61 @@ exports.adminUploads = async (req, res) => {
       message: "Successfully uploaded material",
     });
   } catch (error) {
-    // console.log(error.message);
+    //  // console.log(error.message);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+exports.pdfUpload = async (req, res) => {
+  try {
+    const { numpages } = await pdfpagecounter(req.file.buffer);
+    const options = {
+      density: 100,
+      saveFilename: "untitled",
+      // savePath: "./images",
+      format: "png",
+    };
+    const convert = fromBuffer(req.file.buffer, options);
+    let fileArray = [];
+    for (let i = 0; i < numpages; i++) {
+      convert(i + 1, true).then((output) => fileArray.push(output.page));
+    }
+    console.log(fileArray);
+    // console.log(req.file);
+
+    // const file = req.file;
+    // const values = JSON.parse(req.body.values);
+    // const form = new FormData();
+    //  // console.log(values);
+    // const organization = await Organization.findOne({ _id: values.orgid });
+    // const orgname = organization.name.replace(/[^a-zA-Z0-9]/g, "");
+    // form.append("file", file.buffer, { filename: file.originalname });
+    // form.append(
+    //   "filepath",
+    //   `kernel/noticebee/${orgname}${values.orgid}/materials`
+    // );
+    // const config = {
+    //   headers: {
+    //     "Content-Type": `multipart/form-data; boundary=${form.getBoundary()}`,
+    //   },
+    //   maxContentLength: 100000000,
+    //   maxBodyLength: 1000000000,
+    // };
+    // const { data } = await axios.post(
+    //   // "http://localhost:5050/upload",
+    //   "https://assetupload.coursebee.com/upload",
+    //   form,
+    //   config
+    // );
+    // values.material = data.link;
+    // const material = new Material(values);
+    // await material.save();
+    res.json({
+      success: true,
+      message: "Successfully uploaded material",
+    });
+  } catch (error) {
+    console.log(error);
     res.json({ success: false, message: error.message });
   }
 };
@@ -151,7 +207,7 @@ exports.addnotice = async (req, res) => {
     const bodyData = req.body;
     bodyData.organization = req.params.id;
     const notice = new Notice(bodyData);
-    // console.log(req.body)
+    //  // console.log(req.body)
     await notice.save();
     const organization = await Organization.findOne({ _id: req.params.id });
     organization.boards.map(async (board) => {
@@ -169,7 +225,7 @@ exports.addnotice = async (req, res) => {
 exports.getmaterials = async (req, res) => {
   try {
     const materials = await Material.find({ adminid: req.params.adminid });
-    console.log(materials);
+    // console.log(materials);
     res.json({ success: true, materials: materials });
   } catch (error) {
     res.json({ success: false, message: error.message });
@@ -205,7 +261,7 @@ exports.getselectednotices = async (req, res) => {
 
 exports.changeView = async (req, res) => {
   try {
-    // console.log(req.body);
+    //  // console.log(req.body);
     await NoticeBoard.updateOne(
       { _id: req.params.id },
       {
@@ -229,7 +285,7 @@ exports.getnoticeboards = async (req, res) => {
     const noticeboards = await NoticeBoard.find({
       organization: req.params.orgid,
     }).populate({ path: "organization", select: "name" });
-    // console.log(noticeboards);
+    //  // console.log(noticeboards);
     res.json({ success: true, noticeboards: noticeboards });
   } catch (error) {
     res.json({ success: false, message: error.message });
@@ -319,6 +375,7 @@ exports.setnoticeset = async (req, res) => {
           splitNoticeSets: req.body.splitNoticeSets,
           splitType: req.body.splitType,
           headline: req.body.headline,
+          headlineTwo: req.body.headlineTwo,
         },
       }
     );
@@ -341,10 +398,10 @@ exports.setnoticeset = async (req, res) => {
         topic: `${board.organization}`,
       })
       .then((response) => {
-        console.log("Notification sent out successfully. " + response);
+        // console.log("Notification sent out successfully. " + response);
       })
       .catch((err) => {
-        console.log("Error sending out notification. " + err);
+        // console.log("Error sending out notification. " + err);
       });
     res.json({ success: true, message: "Successfully set notice" });
   } catch (error) {
@@ -364,7 +421,7 @@ exports.getnoticeset = async (req, res) => {
 };
 exports.updateRelatedNoticeboards = async (req, res) => {
   try {
-    console.log(req.body);
+    // console.log(req.body);
     const noticeboards = await NoticeBoard.find({
       organization: req.body.org,
     });
@@ -379,7 +436,7 @@ exports.updateRelatedNoticeboards = async (req, res) => {
     });
     res.json({ success: true });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(404).json({ success: false, message: error.message });
   }
 };
@@ -411,10 +468,10 @@ exports.updatenoticeset = async (req, res) => {
     });
     let boardNames = "";
     for (let i = 0; i < affectedBoards.length; i++) {
-      console.log(affectedBoards[i].name);
+      // console.log(affectedBoards[i].name);
       boardNames += affectedBoards[i].name + " ";
     }
-    console.log(boardNames);
+    // console.log(boardNames);
     // Check if the update actually worked
     // Place FCM notification and response sending here
     admin
@@ -430,10 +487,10 @@ exports.updatenoticeset = async (req, res) => {
         topic: `${noticeset.organization}`,
       })
       .then((response) => {
-        console.log("Notification sent out successfully. " + response);
+        // console.log("Notification sent out successfully. " + response);
       })
       .catch((err) => {
-        console.log("Error sending out notification. " + err);
+        // console.log("Error sending out notification. " + err);
       });
     res.json({ success: true, message: "Successfully updated noticeset" });
   } catch (error) {
@@ -445,7 +502,7 @@ exports.changeLogo = async (req, res) => {
   try {
     const file = req.file;
     const form = new FormData();
-    // console.log(file);
+    //  // console.log(file);
     const organization = await Organization.findOne({ _id: req.body.orgid });
     const orgname = organization.name.replace(/[^a-zA-Z0-9]/g, "");
     form.append("file", file.buffer, { filename: file.originalname });
@@ -483,7 +540,7 @@ exports.changeExtraLogo = async (req, res) => {
   try {
     const file = req.file;
     const form = new FormData();
-    // console.log(file);
+    //  // console.log(file);
     const organization = await Organization.findOne({ _id: req.body.orgid });
     const orgname = organization.name.replace(/[^a-zA-Z0-9]/g, "");
     form.append("file", file.buffer, { filename: file.originalname });
@@ -513,7 +570,7 @@ exports.changeExtraLogo = async (req, res) => {
       message: "Successfully uploaded extra logo",
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.json({ success: false, message: error.message });
   }
 };
@@ -524,7 +581,10 @@ exports.changeOrgName = async (req, res) => {
       { _id: req.params.id },
       { $set: { name: req.body.name } }
     );
-    res.json({ success: true, message: "hey" });
+    res.json({
+      success: true,
+      message: `Changed organization name to ${req.body.name}`,
+    });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }
@@ -536,8 +596,8 @@ exports.changeHeaderStyle = async (req, res) => {
       { _id: req.params.id },
       { $set: { header: req.body } }
     );
-    console.log(req.params.id);
-    res.json({ success: true, message: "hey" });
+    // console.log(req.params.id);
+    res.json({ success: true, message: "Changed header style" });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }
@@ -549,7 +609,19 @@ exports.changeHeadlineStyle = async (req, res) => {
       { _id: req.params.id },
       { $set: { headline: req.body } }
     );
-    res.json({ success: true, message: "hey" });
+    res.json({ success: true, message: "Changed headline style" });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+exports.changeHeadlineTwoStyle = async (req, res) => {
+  try {
+    await Organization.updateOne(
+      { _id: req.params.id },
+      { $set: { headlineTwo: req.body } }
+    );
+    res.json({ success: true, message: "Changed second headline style" });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }

@@ -32,28 +32,28 @@ io.adapter(redis({ host: "localhost", port: 6379 }));
 //socket handler
 io.on("connect", (socket) => {
   socket.on("join", (room) => {
-    console.log(`Socket ${socket.id} joining ${room}`);
+    // console.log(`Socket ${socket.id} joining ${room}`);
     socket.join(room);
   });
-  console.log(`a user connected with ${socket.id}`);
+  // console.log(`a user connected with ${socket.id}`);
   socket.on("connected", (boardId) => {
-    console.log(boardId);
+    // console.log(boardId);
     // io.emit("update", boardId);
     io.to(boardId.id).emit("update");
   });
   socket.on("updatedata", (data) => {
-    console.log(data);
+    // console.log(data);
     io.to(data.id).emit("update");
   });
   socket.on("updatealldata", (data) => {
-    console.log(data);
+    // console.log(data);
     OrganizationModel.findOne({ _id: data.id }, function (err, organization) {
       if (err) {
         console.log(err);
       } else {
         organization.boards.map((boardid) => {
           io.to(boardid).emit("update");
-          console.log(boardid);
+          // console.log(boardid);
         });
       }
     });
@@ -78,19 +78,19 @@ const connectMongose = () => {
 };
 
 connectMongose();
-// console.log(mongoUri);
+//  // console.log(mongoUri);
 
 // mongoose
 // .connect(
 //   `mongodb+srv://${DBUSER}:${DBPASSWORD}@njay.iy3to.mongodb.net/${DBNAME}?retryWrites=true&w=majority`,
 //   { useNewUrlParser: true, useUnifiedTopology: true }
 // )
-// .catch((error) => console.log(error));
+// .catch((error) =>  // console.log(error));
 
 // const db = mongoose.connection;
 // db.on("error", console.error.bind(console, "connection error:"));
 // db.once("open", function () {
-//   console.log("connected to database");
+//    // console.log("connected to database");
 // });
 
 //route management
