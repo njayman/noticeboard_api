@@ -134,7 +134,7 @@ exports.getNotices = async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.params.id });
     const board = await NoticeBoardModel.findOne({ _id: req.params.boardid })
-      .select("name splitNoticeSets headline organization")
+      .select("name splitNoticeSets headline headlineTwo organization")
       .populate({
         path: "splitNoticeSets",
         select: "materials",
